@@ -25,8 +25,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping("/register")
-    public Result register(String username, String password, String checkpassword) {
+    @PostMapping("/register")
+    public Result register(@RequestBody Map<String, String> registerData) {
+        String username = registerData.get("username");
+        String password = registerData.get("password");
+        String checkpassword = registerData.getOrDefault("checkpassword", registerData.get("confirmPassword"));
         Result result = userService.saveUser(username, password, checkpassword);
         return result;
     }
@@ -83,5 +86,10 @@ public class UserController {
         }else{
             return Result.error(0,"用户登录失败");
         }
+    }
+
+    @PostMapping("/loginAdmin")
+    public Result loginAdmin(@RequestBody Map<String, String> loginData) {
+        return login(loginData); // 复用现有的登录逻辑
     }
 }

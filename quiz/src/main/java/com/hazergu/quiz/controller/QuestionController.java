@@ -53,6 +53,7 @@ public class QuestionController {
         return Result.error(0, "用户不存在或已被删除");
     }
 
+    @CrossOrigin(origins = "http://localhost:8081", allowCredentials = "true")
     @GetMapping("/getQuestion")
     public Result getQuestion() {
         List<QSBeanOut> qsBeanOut = questionService.getQuestions();
