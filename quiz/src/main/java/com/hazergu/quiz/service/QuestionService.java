@@ -15,5 +15,8 @@ public interface QuestionService {
     public QSBeanPage page(Integer page, Integer pageSize);
     //
     public List<QSBeanOutManage> findByName(String keyword);
+    
+    //update question
+    public int updateQuestion(QSBean qsBean);
 
 }

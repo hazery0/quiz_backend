@@ -64,6 +64,23 @@ public class UserController {
         return Result.success(users);
     }
 
+    @PostMapping("/addUser")
+    public Result addUser(@RequestBody Map<String, Object> userData) {
+        String username = (String) userData.get("username");
+        String password = (String) userData.get("password");
+        Integer userRole = (Integer) userData.get("userRole");
+        
+        Result result = userService.addUser(username, password, userRole);
+        return result;
+    }
+
+    @PostMapping("/resetPassword")
+    public Result resetPassword(@RequestBody Map<String, Object> resetData) {
+        Long userId = Long.valueOf(resetData.get("userId").toString());
+        Result result = userService.resetPassword(userId);
+        return result;
+    }
+
     @PostMapping("/login")
     public Result login(@RequestBody Map<String, String> loginData){
 
@@ -78,6 +95,7 @@ public class UserController {
             Claims claims = Jwts.claims();
             claims.put("id", userResult.getId());
             claims.put("username", userResult.getUserName());
+            claims.put("userRole", userResult.getUserRole());
 
             String token = JwtUtil.generateTokenWithClaims(claims);
             Result result = Result.success("用户登录成功");
@@ -90,6 +108,49 @@ public class UserController {
 
     @PostMapping("/loginAdmin")
     public Result loginAdmin(@RequestBody Map<String, String> loginData) {
-        return login(loginData); // 复用现有的登录逻辑
+        String username = loginData.get("username");
+        String password = loginData.get("password");
+
+        if (StringUtils.isAnyBlank(username, password)) {
+            return Result.error(0,"用户名或密码为空");
+        }
+        User userResult = userService.login(username, password);
+        if(userResult!=null){
+            // 检查是否为管理员
+            if(userResult.getUserRole() != 1) {
+                return Result.error(0,"只有管理员才能登录管理端");
+            }
+            Claims claims = Jwts.claims();
+            claims.put("id", userResult.getId());
+            claims.put("username", userResult.getUserName());
+            claims.put("userRole", userResult.getUserRole());
+
+            String token = JwtUtil.generateTokenWithClaims(claims);
+            Result result = Result.success("管理员登录成功");
+            result.setData(token);
+            return result;
+        }else{
+            return Result.error(0,"管理员登录失败");
+        }
+    }
+
+    @PostMapping("/toggleAdmin")
+    public Result toggleAdmin(@RequestBody Map<String, Object> toggleData) {
+        Long userId = null;
+        try {
+            userId = Long.valueOf(toggleData.get("id").toString());
+        } catch (Exception e) {
+            return Result.error(0, "用户ID格式错误");
+        }
+
+        Boolean isAdmin = (Boolean) toggleData.get("isAdmin");
+        if (isAdmin == null) {
+            return Result.error(0, "isAdmin参数不能为空");
+        }
+
+        Integer userRole = isAdmin ? 1 : 0;  // true->管理员(1), false->普通用户(0)
+
+        Result result = userService.toggleAdmin(userId, userRole);
+        return result;
     }
 }

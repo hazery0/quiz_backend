@@ -21,4 +21,12 @@ public interface UserService {
     //login
     public User login(String username, String password);
     
+    //add user by admin
+    public Result addUser(String username, String password, Integer userRole);
+    
+    //reset user password
+    public Result resetPassword(Long userId);
+
+    //set Admin
+    public Result toggleAdmin(Long userId, Integer userRole);
 }

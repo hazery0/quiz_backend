@@ -1,6 +1,7 @@
 package com.hazergu.quiz.model;
 
 public class QSBean {
+    private Integer id;
     private String question;
     private String optiona;
     private String optionb;
@@ -14,7 +15,8 @@ public class QSBean {
     @Override
     public String toString() {
         return "QSBean{" +
-                "question='" + question + '\'' +
+                "id=" + id +
+                ", question='" + question + '\'' +
                 ", optiona='" + optiona + '\'' +
                 ", optionb='" + optionb + '\'' +
                 ", optionc='" + optionc + '\'' +
@@ -23,13 +25,21 @@ public class QSBean {
                 '}';
     }
 
-    public QSBean(String question, String optiona, String optionb, String optionc, String optiond, String answer) {
+    public QSBean(Integer id, String question, String optiona, String optionb, String optionc, String optiond, String answer) {
         this.question = question;
         this.optiona = optiona;
         this.optionb = optionb;
         this.optionc = optionc;
         this.optiond = optiond;
         this.answer = answer;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getQuestion() {

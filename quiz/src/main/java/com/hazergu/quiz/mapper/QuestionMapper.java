@@ -31,5 +31,11 @@ public interface QuestionMapper {
     @Select("SELECT * FROM questions WHERE questionText LIKE CONCAT('%', #{keyword}, '%') AND isDelete=0")
     List<Question> findByName(String keyword);
 
+    @Update("UPDATE questions SET questionText = #{questionText}, answer1Text = #{answer1Text}, answer1Correct = #{answer1Correct}, " +
+            "answer2Text = #{answer2Text}, answer2Correct = #{answer2Correct}, answer3Text = #{answer3Text}, " +
+            "answer3Correct = #{answer3Correct}, answer4Text = #{answer4Text}, answer4Correct = #{answer4Correct}, " +
+            "updateTime = NOW() WHERE id = #{id} AND isDelete = 0")
+    int updateQuestion(Question question);
+
 }
 

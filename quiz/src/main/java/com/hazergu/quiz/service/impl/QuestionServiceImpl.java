@@ -117,10 +117,67 @@ public class QuestionServiceImpl implements QuestionService {
         return qsBeanPage;
     }
 
+    @Override
     public List<QSBeanOutManage> findByName(String keyword){  // 修复返回类型
         List<Question> questionList = questionMapper.findByName(keyword);  // 修复变量名
 
         List<QSBeanOutManage> qsBeanOutManageList = Tools.convertToQSBeanManageList(questionList);  // 修复变量名
         return qsBeanOutManageList;
+    }
+
+    @Override
+    public int updateQuestion(QSBean qsBean) {
+        // 添加详细的空值检查
+        if (qsBean == null) {
+            throw new IllegalArgumentException("Question data cannot be null");
+        }
+
+        // 检查id是否存在
+        if (qsBean.getId() == null) {
+            throw new IllegalArgumentException("Question id cannot be null");
+        }
+
+        String ans = qsBean.getAnswer();
+        // 详细的空值和空字符串检查
+        if (ans == null) {
+            throw new IllegalArgumentException("Answer cannot be null");
+        }
+
+        if (ans.trim().isEmpty()) {
+            throw new IllegalArgumentException("Answer cannot be empty");
+        }
+
+        // 现在可以安全地调用 toLowerCase()
+        String lowerAns = ans.toLowerCase();
+        if (!List.of("a", "b", "c", "d").contains(lowerAns)) {
+            throw new IllegalArgumentException("Answer must be one of: a, b, c, or d");
+        }
+
+        // 检查其他必要字段
+        if (qsBean.getQuestion() == null || qsBean.getQuestion().trim().isEmpty()) {
+            throw new IllegalArgumentException("Question text cannot be null or empty");
+        }
+
+        Question q = new Question();
+        q.setId(qsBean.getId());
+        q.setQuestionText(qsBean.getQuestion());
+
+        // 设置选项，处理可能的空值
+        q.setAnswer1Text(qsBean.getOptiona() != null ? qsBean.getOptiona() : "");
+        q.setAnswer1Correct("a".equals(lowerAns));
+
+        q.setAnswer2Text(qsBean.getOptionb() != null ? qsBean.getOptionb() : "");
+        q.setAnswer2Correct("b".equals(lowerAns));
+
+        q.setAnswer3Text(qsBean.getOptionc() != null ? qsBean.getOptionc() : "");
+        q.setAnswer3Correct("c".equals(lowerAns));
+
+        q.setAnswer4Text(qsBean.getOptiond() != null ? qsBean.getOptiond() : "");
+        q.setAnswer4Correct("d".equals(lowerAns));
+
+        q.setUpdateTime(new Date());
+
+        int result = questionMapper.updateQuestion(q);
+        return result;
     }
 }

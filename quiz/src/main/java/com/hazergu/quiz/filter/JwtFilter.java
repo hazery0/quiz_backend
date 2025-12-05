@@ -69,8 +69,29 @@ public class JwtFilter implements Filter {
 
         //5、解析token，如果解析失败，返回未登录信息。
         try {
-            JwtUtil.parseToken(token);
+            // 解析token，获取Claims
+            io.jsonwebtoken.Claims claims = JwtUtil.parseTokenReturnClaims(token);
             System.out.println("token验证成功");
+            
+            // 获取用户角色
+            Integer userRole = (Integer) claims.get("userRole");
+            System.out.println("用户角色: " + userRole);
+            
+            // 判断是否需要管理员权限
+            if (url.contains("/addUser") || url.contains("/resetPassword") || 
+                url.contains("/deleteById") || url.contains("/deleteByName") ||
+                url.contains("/users") || url.contains("/findUser")) {
+                // 管理端API，需要管理员权限
+                if (userRole == null || userRole != 1) {
+                    System.out.println("没有管理员权限，拒绝访问");
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    Result result = Result.error(0, "NO_ADMIN_PERMISSION");
+                    String noPermission = JSONObject.toJSONString(result);
+                    response.setContentType("application/json;charset=UTF-8");
+                    res.getWriter().write(noPermission);
+                    return;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("token解析失败");

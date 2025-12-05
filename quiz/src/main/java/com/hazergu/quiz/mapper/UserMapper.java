@@ -1,3 +1,4 @@
+// UserMapper.java
 package com.hazergu.quiz.mapper;
 
 import com.hazergu.quiz.model.User;
@@ -46,4 +47,15 @@ public interface UserMapper {
 
     @Select("select * from user where userName=#{username} AND userPassword=#{password}")
     public User getByNameAndPassword(String username, String password);
+
+    @Update("UPDATE user SET userPassword = #{password}, updateTime = NOW() WHERE id = #{id} AND isDelete = 0")
+    public int resetPassword(@Param("id") Long id, @Param("password") String password);
+
+    // 添加根据ID获取用户的方法
+    @Select("SELECT * FROM user WHERE id = #{id} AND isDelete = 0")
+    public User getById(@Param("id") Long id);
+
+    // 添加更新用户角色的方法
+    @Update("UPDATE user SET userRole = #{userRole}, updateTime = NOW() WHERE id = #{userId} AND isDelete = 0")
+    public int updateUserRole(@Param("userId") Long userId, @Param("userRole") Integer userRole);
 }

@@ -71,4 +71,35 @@ public class QuestionController {
         List<QSBeanOutManage> qsBeanOut=questionService.findByName(keyword);
         return Result.success(qsBeanOut);
     }
+
+    @PutMapping("/updateQuestion")
+    public Result updateQuestion(@RequestBody QSBean question) {
+        try {
+            // 详细的调试信息
+            System.out.println("=== 调试信息：接收到的 QSBean 对象 ===");
+            System.out.println("Question 对象是否为 null: " + (question == null));
+            if (question != null) {
+                System.out.println("id 字段: " + question.getId());
+                System.out.println("question 字段: " + question.getQuestion());
+                System.out.println("optiona 字段: " + question.getOptiona());
+                System.out.println("optionb 字段: " + question.getOptionb());
+                System.out.println("optionc 字段: " + question.getOptionc());
+                System.out.println("optiond 字段: " + question.getOptiond());
+                System.out.println("answer 字段: " + question.getAnswer());
+            }
+            System.out.println("===================================");
+
+            int result = questionService.updateQuestion(question);
+            if (result > 0){
+                return Result.success("更新问题成功");
+            }else{
+                return Result.error(0, "更新失败");
+            }
+        } catch (IllegalArgumentException e) {
+            return Result.error(0, "参数错误: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(0, "服务器内部错误: " + e.getMessage());
+        }
+    }
 }

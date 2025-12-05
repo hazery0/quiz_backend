@@ -116,4 +116,88 @@ public class UserServiceImpl implements UserService {
         return userMapper.getByNameAndPassword(username,encrptedPassword);
     }
 
+    @Override
+    public Result addUser(String username, String password, Integer userRole) {
+        if(StringUtils.isAnyBlank(username, password)) {
+            return Result.error(null, "用户名或密码为空");
+        }
+
+        String regex = "^[a-zA-Z0-9]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(username);
+        if(!matcher.matches()) {
+            return Result.error(null, "用户名包含特殊字符");
+        }
+
+        //check if username exist
+        int userExist = userMapper.existsByName(username);
+        if (userExist > 0) {
+            return Result.error(0, "Username already exist");
+        }
+
+        final String SALT = "com.quiz";
+        String encrptedPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+
+        User user = new User();
+        user.setUserName(username);
+        user.setUserPassword(encrptedPassword);
+        user.setUserRole(userRole); // 0-普通用户，1-管理员
+        user.setIsDelete(0);
+
+        Date now = new Date();
+        user.setCreateTime(now);
+        user.setUpdateTime(now);
+
+        //插入到数据库
+        int result = userMapper.saveUser(user);
+
+        if (result > 0)
+            return Result.success("新增用户成功");
+        else
+            return Result.error(null, "新增用户失败");
+    }
+
+    @Override
+    public Result resetPassword(Long userId) {
+        // 重置密码为123456
+        final String SALT = "com.quiz";
+        String defaultPassword = "123456";
+        String encrptedPassword = DigestUtils.md5DigestAsHex((SALT + defaultPassword).getBytes());
+        
+        int result = userMapper.resetPassword(userId, encrptedPassword);
+        
+        if (result > 0) {
+            return Result.success("密码重置成功");
+        } else {
+            return Result.error(null, "密码重置失败，用户不存在或已被删除");
+        }
+    }
+
+    // UserServiceImpl.java
+    @Override
+    public Result toggleAdmin(Long userId, Integer userRole) {
+        if (userId == null) {
+            return Result.error(null, "用户ID不能为空");
+        }
+
+        if (userRole == null || (userRole != 0 && userRole != 1)) {
+            return Result.error(null, "用户角色参数错误");
+        }
+
+        // 检查用户是否存在
+        User user = userMapper.getById(userId);
+        if (user == null) {
+            return Result.error(null, "用户不存在或已被删除");
+        }
+
+        // 更新用户角色
+        int result = userMapper.updateUserRole(userId, userRole);
+
+        if (result > 0) {
+            String roleName = userRole == 1 ? "管理员" : "普通用户";
+            return Result.success("用户角色已更新为" + roleName);
+        } else {
+            return Result.error(null, "更新用户角色失败");
+        }
+    }
 }
